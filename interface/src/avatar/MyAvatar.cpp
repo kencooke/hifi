@@ -1709,9 +1709,12 @@ bool findAvatarAvatarPenetration(const glm::vec3 positionA, float radiusA, float
     return false;
 }
 
+extern float __global__avatarPitchShift;
+
 void MyAvatar::increaseSize() {
     if ((1.0f + SCALING_RATIO) * _targetScale < MAX_AVATAR_SCALE) {
         _targetScale *= (1.0f + SCALING_RATIO);
+        __global__avatarPitchShift *= (1.0f + SCALING_RATIO);
         qCDebug(interfaceapp, "Changed scale to %f", (double)_targetScale);
     }
 }
@@ -1719,12 +1722,14 @@ void MyAvatar::increaseSize() {
 void MyAvatar::decreaseSize() {
     if (MIN_AVATAR_SCALE < (1.0f - SCALING_RATIO) * _targetScale) {
         _targetScale *= (1.0f - SCALING_RATIO);
+        __global__avatarPitchShift *= (1.0f - SCALING_RATIO);
         qCDebug(interfaceapp, "Changed scale to %f", (double)_targetScale);
     }
 }
 
 void MyAvatar::resetSize() {
     _targetScale = 1.0f;
+    __global__avatarPitchShift = 1.0f;
     qCDebug(interfaceapp, "Reset scale to %f", (double)_targetScale);
 }
 
