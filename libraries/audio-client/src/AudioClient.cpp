@@ -1815,7 +1815,7 @@ float AudioClient::azimuthForSource(const glm::vec3& relativePosition) {
 
 float AudioClient::gainForSource(float distance, float volume) {
 
-    const float ATTENUATION_BEGINS_AT_DISTANCE = 1.0f;
+    const float ATTENUATION_BEGINS_AT_DISTANCE = 2.0f;
 
     // I'm assuming that the AudioMixer's getting of the stream's attenuation
     // factor is basically same as getting volume

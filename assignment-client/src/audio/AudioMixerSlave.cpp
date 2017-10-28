@@ -523,7 +523,7 @@ float computeGain(const AvatarAudioStream& listeningNodeStream, const Positional
     }
 
     // distance attenuation
-    const float ATTENUATION_START_DISTANCE = 1.0f;
+    const float ATTENUATION_START_DISTANCE = 2.0f;
     float distance = glm::length(relativePosition);
     assert(ATTENUATION_START_DISTANCE > EPSILON);
     if (distance >= ATTENUATION_START_DISTANCE) {
