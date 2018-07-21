@@ -506,9 +506,13 @@ float approximateGain(const AvatarAudioStream& listeningNodeStream, const Positi
 
     // distance attenuation: approximate, ignore zone-specific attenuations
     float distance = glm::length(relativePosition);
-    return gain / distance;
+
+    float d = (1.0f / ATTN_DISTANCE_REF) * std::max(distance, HRTF_NEARFIELD_MIN);
+    gain = gain / d;
+    gain = std::min(gain, ATTN_GAIN_MAX);
 
     // avatar: skip master gain - it is constant for all streams
+    return gain;
 }
 
 float computeGain(const AudioMixerClientData& listenerNodeData, const AvatarAudioStream& listeningNodeStream,
@@ -553,9 +557,10 @@ float computeGain(const AudioMixerClientData& listenerNodeData, const AvatarAudi
     float g = glm::clamp(1.0f - attenuationPerDoublingInDistance, EPSILON, 1.0f);
 
     // calculate the attenuation using the distance to this node
-    // reference attenuation of 0dB at distance = 1.0m
-    gain *= fastExp2f(fastLog2f(g) * fastLog2f(std::max(distance, HRTF_NEARFIELD_MIN)));
-    gain = std::min(gain, 1.0f / HRTF_NEARFIELD_MIN);
+    // with reference attenuation of 0dB at distance = ATTN_DISTANCE_REF
+    float d = (1.0f / ATTN_DISTANCE_REF) * std::max(distance, HRTF_NEARFIELD_MIN);
+    gain *= fastExp2f(fastLog2f(g) * fastLog2f(d));
+    gain = std::min(gain, ATTN_GAIN_MAX);
 
     return gain;
 }
