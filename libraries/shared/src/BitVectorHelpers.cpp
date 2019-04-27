@@ -262,7 +262,8 @@ void decodeBitVector(uint8_t* codeBytes, int numCodeBytes, bool* bitVector, int 
     }
 
     // reconstruct final run
-    runLengths[numRunLengths++] = numBits - numRunLengths - sumRunLengths - 1;
+    length = numBits - numRunLengths - sumRunLengths - 1;
+    runLengths[numRunLengths++] = length;
 
     //
     // Run-length decode
@@ -271,7 +272,7 @@ void decodeBitVector(uint8_t* codeBytes, int numCodeBytes, bool* bitVector, int 
     int numBitsDecoded = 0;
     for (int i = 0; i < numRunLengths; i++) {
 
-        int length = runLengths[i];
+        length = runLengths[i];
 
         bitVector[numBitsDecoded++] = bit;
         while (length--) {
