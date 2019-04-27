@@ -12,6 +12,9 @@
 #ifndef hifi_BitVectorHelpers_h
 #define hifi_BitVectorHelpers_h
 
+#include <stdint.h>
+#include <assert.h>
+
 #include "NumericalConstants.h"
 
 int calcBitVectorSize(int numBits) {

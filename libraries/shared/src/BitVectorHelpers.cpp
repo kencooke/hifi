@@ -11,9 +11,7 @@
 
 #include "BitVectorHelpers.h"
 
-#include <stdint.h>
 #include <string.h>
-#include <assert.h>
 
 class BitStream {
 
