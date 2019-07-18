@@ -18,7 +18,7 @@ elseif (APPLE)
     )
 elseif (ANDROID)
 # then not desktop Linux
-elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
+else ()
     vcpkg_download_distfile(
         WEBRTC_SOURCE_ARCHIVE
         URLS https://hifi-public.s3.amazonaws.com/seth/webrtc-20190626-linux.tar.gz
