@@ -12,9 +12,9 @@ if (WIN32)
 elseif (APPLE)
     vcpkg_download_distfile(
         WEBRTC_SOURCE_ARCHIVE
-        URLS https://hifi-public.s3.amazonaws.com/seth/webrtc-20190626-linux.tar.gz
+        URLS https://hifi-public.s3.amazonaws.com/seth/webrtc-20190626-osx.tar.gz
         SHA512 fc70cec1b5ee87395137b7090f424e2fc2300fc17d744d5ffa1cf7aa0e0f1a069a9d72ba1ad2fb4a640ebeb6c218bda24351ba0083e1ff96c4a4b5032648a9d2
-        FILENAME webrtc-20190626-linux.tar.gz
+        FILENAME webrtc-20190626-osx.tar.gz
     )
 elseif (ANDROID)
 # then not desktop Linux

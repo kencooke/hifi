@@ -7,7 +7,6 @@
 macro(TARGET_WEBRTC)
 
 if (ANDROID)
-elseif(APPLE)
 else()
     target_include_directories(${TARGET_NAME} SYSTEM PUBLIC "${VCPKG_INSTALL_ROOT}/include/webrtc")
     find_library(WEBRTC_LIBRARY NAMES webrtc PATHS ${VCPKG_INSTALL_ROOT}/lib/ NO_DEFAULT_PATH)
