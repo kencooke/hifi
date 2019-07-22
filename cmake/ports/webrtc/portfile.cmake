@@ -6,7 +6,7 @@ if (WIN32)
     vcpkg_download_distfile(
         WEBRTC_SOURCE_ARCHIVE
         URLS https://hifi-public.s3.amazonaws.com/seth/webrtc-20190626-windows.zip
-        SHA512 f4444a95f87800b446d95a4c381b69a8ddc36d89a08ce57bf2b03d684ce528b592a3260ef2f9dee314e38b58dd236a3495677e1c7773ce3d4057f59e80b48f32
+        SHA512 c0848eddb1579b3bb0496b8785e24f30470f3c477145035fd729264a326a467b9467ae9f426aa5d72d168ad9e9bf2c279150744832736bdf39064d24b04de1a3
         FILENAME webrtc-20190626-windows.zip
     )
 elseif (APPLE)
