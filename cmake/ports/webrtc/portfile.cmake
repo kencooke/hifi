@@ -2,7 +2,9 @@ include(vcpkg_common_functions)
 set(WEBRTC_VERSION 20190626)
 set(MASTER_COPY_SOURCE_PATH ${CURRENT_BUILDTREES_DIR}/src)
 
-if (WIN32)
+if (ANDROID)
+   # this is handled by hifi_android.py
+elseif (WIN32)
     vcpkg_download_distfile(
         WEBRTC_SOURCE_ARCHIVE
         URLS https://hifi-public.s3.amazonaws.com/seth/webrtc-20190626-windows.zip
@@ -15,13 +17,6 @@ elseif (APPLE)
         URLS https://hifi-public.s3.amazonaws.com/seth/webrtc-20190626-osx.tar.gz
         SHA512 fc70cec1b5ee87395137b7090f424e2fc2300fc17d744d5ffa1cf7aa0e0f1a069a9d72ba1ad2fb4a640ebeb6c218bda24351ba0083e1ff96c4a4b5032648a9d2
         FILENAME webrtc-20190626-osx.tar.gz
-    )
-elseif (ANDROID)
-    vcpkg_download_distfile(
-        WEBRTC_SOURCE_ARCHIVE
-        URLS https://hifi-public.s3.amazonaws.com/seth/webrtc-20190626-android.tar.gz
-        SHA512 31f92e70ef0b9812294326331a9b5b9b53f7fec7fd8174e83435857997fbe7d954b858d7bbe39835c9a9eda7b2d5365e192afcb33abc851e5816f047b5309e14
-        FILENAME webrtc-20190626-android.tar.gz
     )
 else ()
     # else Linux desktop
