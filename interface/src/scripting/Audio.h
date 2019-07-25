@@ -72,6 +72,9 @@ class Audio : public AudioScriptingInterface, protected ReadWriteLockable {
      * @property {number} systemInjectorGain - The gain (relative volume) that system sounds are played at.
      * @property {number} pushingToTalkOutputGainDesktop - The gain (relative volume) that all sounds are played at when the user is holding
      *     the push-to-talk key in Desktop mode.
+     * @property {boolean} audioEchoCancelation - <code>true</code> if audio-echo-cancelation is enabled, otherwise
+     *     <code>false</code>. When enabled, sound from the audio output will be suppressed when it echos back to the
+     *     input audio signal.
      *
      * @comment The following properties are from AudioScriptingInterface.h.
      * @property {boolean} isStereoInput - <code>true</code> if the input audio is being used in stereo, otherwise
@@ -85,6 +88,8 @@ class Audio : public AudioScriptingInterface, protected ReadWriteLockable {
     Q_PROPERTY(bool muted READ isMuted WRITE setMuted NOTIFY mutedChanged)
     Q_PROPERTY(bool noiseReduction READ noiseReductionEnabled WRITE enableNoiseReduction NOTIFY noiseReductionChanged)
     Q_PROPERTY(bool warnWhenMuted READ warnWhenMutedEnabled WRITE enableWarnWhenMuted NOTIFY warnWhenMutedChanged)
+    Q_PROPERTY(bool audioEchoCancelation
+               READ audioEchoCancelationEnabled WRITE enableAudioEchoCancelation NOTIFY audioEchoCancelationChanged)
     Q_PROPERTY(float inputVolume READ getInputVolume WRITE setInputVolume NOTIFY inputVolumeChanged)
     Q_PROPERTY(float inputLevel READ getInputLevel NOTIFY inputLevelChanged)
     Q_PROPERTY(bool clipping READ isClipping NOTIFY clippingChanged)
@@ -115,6 +120,7 @@ public:
     bool isMuted() const;
     bool noiseReductionEnabled() const;
     bool warnWhenMutedEnabled() const;
+    bool audioEchoCancelationEnabled() const;
     float getInputVolume() const;
     float getInputLevel() const;
     bool isClipping() const;
@@ -397,6 +403,14 @@ signals:
     void warnWhenMutedChanged(bool isEnabled);
 
     /**jsdoc
+     * Triggered when audio echo cancelation is enabled or disabled.
+     * @function Audio.audioEchoCancelationChanged
+     * @param {boolean} isEnabled - <code>true</code> if audio echo cancelation is enabled, otherwise <code>false</code>.
+     * @returns {Signal}
+     */
+    void audioEchoCancelationChanged(bool isEnabled);
+
+    /**jsdoc
      * Triggered when the input audio volume changes.
      * @function Audio.inputVolumeChanged
      * @param {number} volume - The requested volume to be applied to the audio input, range <code>0.0</code> &ndash;
@@ -494,6 +508,7 @@ private slots:
     void setMuted(bool muted);
     void enableNoiseReduction(bool enable);
     void enableWarnWhenMuted(bool enable);
+    void enableAudioEchoCancelation(bool enable);
     void setInputVolume(float volume);
     void onInputLoudnessChanged(float loudness, bool isClipping);
 
@@ -512,6 +527,7 @@ private:
     bool _isClipping { false };
     bool _enableNoiseReduction { true };  // Match default value of AudioClient::_isNoiseGateEnabled.
     bool _enableWarnWhenMuted { true };
+    bool _enableAudioEchoCancelation { true }; // AudioClient::_isAECEnabled
     bool _contextIsHMD { false };
     AudioDevices* getDevices() { return &_devices; }
     AudioDevices _devices;
