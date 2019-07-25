@@ -222,19 +222,19 @@ Rectangle {
                 }
 
                 HifiControlsUit.Switch {
-                    id: acousticEchoCancelationSwitch;
+                    id: acousticEchoCancellationSwitch;
                     height: root.switchHeight;
                     switchWidth: root.switchWidth;
                     anchors.top: noiseReductionSwitch.bottom
                     anchors.topMargin: 24
                     anchors.left: parent.left
-                    labelTextOn: "Echo Cancelation";
+                    labelTextOn: "Echo Cancellation";
                     labelTextSize: 16;
                     backgroundOnColor: "#E3E3E3";
-                    checked: AudioScriptingInterface.acousticEchoCancelation;
+                    checked: AudioScriptingInterface.acousticEchoCancellation;
                     onCheckedChanged: {
-                        AudioScriptingInterface.acousticEchoCancelation = checked;
-                        checked = Qt.binding(function() { return AudioScriptingInterface.acousticEchoCancelation; });
+                        AudioScriptingInterface.acousticEchoCancellation = checked;
+                        checked = Qt.binding(function() { return AudioScriptingInterface.acousticEchoCancellation; });
                     }
                 }
 
@@ -242,7 +242,7 @@ Rectangle {
                     id: pttSwitch
                     height: root.switchHeight;
                     switchWidth: root.switchWidth;
-                    anchors.top: acousticEchoCancelationSwitch.bottom;
+                    anchors.top: acousticEchoCancellationSwitch.bottom;
                     anchors.topMargin: 24
                     anchors.left: parent.left
                     labelTextOn: (bar.currentIndex === 0) ? qsTr("Push To Talk (T)") : qsTr("Push To Talk");
