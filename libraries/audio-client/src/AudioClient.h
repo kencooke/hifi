@@ -216,8 +216,8 @@ public slots:
     void setWarnWhenMuted(bool isNoiseGateEnabled, bool emitSignal = true);
     bool isWarnWhenMutedEnabled() const { return _warnWhenMuted; }
 
-    void setAudioEchoCancelation(bool isAECEnabled, bool emitSignal = true);
-    bool isAudioEchoCancelationEnabled() const { return _isAECEnabled; }
+    void setAcousticEchoCancelation(bool isAECEnabled, bool emitSignal = true);
+    bool isAcousticEchoCancelationEnabled() const { return _isAECEnabled; }
 
     virtual bool getLocalEcho() override { return _shouldEchoLocally; }
     virtual void setLocalEcho(bool localEcho) override { _shouldEchoLocally = localEcho; }
@@ -260,7 +260,7 @@ signals:
     void muteToggled(bool muted);
     void noiseReductionChanged(bool noiseReductionEnabled);
     void warnWhenMutedChanged(bool warnWhenMutedEnabled);
-    void audioEchoCancelationChanged(bool audioEchoCancelationEnabled);
+    void acousticEchoCancelationChanged(bool acousticEchoCancelationEnabled);
     void mutedByMixer();
     void inputReceived(const QByteArray& inputSamples);
     void inputLoudnessChanged(float loudness, bool isClipping);

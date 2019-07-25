@@ -1716,11 +1716,11 @@ void AudioClient::setWarnWhenMuted(bool enable, bool emitSignal) {
     }
 }
 
-void AudioClient::setAudioEchoCancelation(bool enable, bool emitSignal) {
+void AudioClient::setAcousticEchoCancelation(bool enable, bool emitSignal) {
     if (_isAECEnabled != enable) {
         _isAECEnabled = enable;
         if (emitSignal) {
-            emit audioEchoCancelationChanged(_isAECEnabled);
+            emit acousticEchoCancelationChanged(_isAECEnabled);
         }
     }
 }
