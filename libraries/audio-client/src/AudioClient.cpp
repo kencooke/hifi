@@ -1135,8 +1135,6 @@ void AudioClient::configureWebrtc() {
     config.level_estimation.enabled = false;
 
     _apm->ApplyConfig(config);
-
-    qCDebug(audioclient) << "WebRTC enabled for acoustic echo cancellation.";
 }
 
 // rebuffer into 10ms chunks
@@ -1207,7 +1205,7 @@ void AudioClient::processWebrtcNearEnd(int16_t* samples, int numFrames, int numC
 
     // process one chunk
     int error = _apm->ProcessStream(buffers, streamConfig, streamConfig, buffers);
-    if (error =! _apm->kNoError) {
+    if (error != _apm->kNoError) {
         qCWarning(audioclient) << "WebRTC ProcessStream() returned ERROR:" << error;
     } else {
         // modify samples in-place
