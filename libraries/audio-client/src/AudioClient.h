@@ -156,6 +156,7 @@ public:
     bool outputLocalInjector(const AudioInjectorPointer& injector) override;
 
     QAudioDeviceInfo getActiveAudioDevice(QAudio::Mode mode) const;
+    QAudioDeviceInfo getDefaultAudioDevice(QAudio::Mode mode) const;
     QList<QAudioDeviceInfo> getAudioDevices(QAudio::Mode mode) const;
 
     void enablePeakValues(bool enable) { _enablePeakValues = enable; }
@@ -273,6 +274,7 @@ signals:
 
     void deviceChanged(QAudio::Mode mode, const QAudioDeviceInfo& device);
     void devicesChanged(QAudio::Mode mode, const QList<QAudioDeviceInfo>& devices);
+    void defaultChanged(QAudio::Mode mode, const QAudioDeviceInfo& device);
     void peakValueListChanged(const QList<float> peakValueList);
 
     void receivedFirstPacket();

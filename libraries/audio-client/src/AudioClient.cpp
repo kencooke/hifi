@@ -115,10 +115,12 @@ void AudioClient::checkDevices() {
 
     if (defaultInputDeviceInfo != _defaultInputDeviceInfo) {
         _defaultInputDeviceInfo = defaultInputDeviceInfo;
+        emit defaultChanged(QAudio::AudioInput, _defaultInputDeviceInfo);
     }
 
     if (defaultOutputDeviceInfo != _defaultOutputDeviceInfo) {
         _defaultOutputDeviceInfo = defaultOutputDeviceInfo;
+        emit defaultChanged(QAudio::AudioOutput, _defaultOutputDeviceInfo);
     }
 
     // detect when an audio device has been added or removed
@@ -144,6 +146,16 @@ QAudioDeviceInfo AudioClient::getActiveAudioDevice(QAudio::Mode mode) const {
         return _inputDeviceInfo;
     } else { // if (mode == QAudio::AudioOutput)
         return _outputDeviceInfo;
+    }
+}
+
+QAudioDeviceInfo AudioClient::getDefaultAudioDevice(QAudio::Mode mode) const {
+    Lock lock(_deviceMutex);
+
+    if (mode == QAudio::AudioInput) {
+        return _defaultInputDeviceInfo;
+    } else { // if (mode == QAudio::AudioOutput)
+        return _defaultOutputDeviceInfo;
     }
 }
 
@@ -583,9 +595,6 @@ QAudioDeviceInfo defaultAudioDeviceForMode(QAudio::Mode mode) {
         pMMDeviceEnumerator = NULL;
         CoUninitialize();
     }
-
-    qCDebug(audioclient) << "defaultAudioDeviceForMode mode: " << (mode == QAudio::AudioOutput ? "Output" : "Input")
-        << " [" << deviceName << "] [" << getNamedAudioDeviceForMode(mode, deviceName).deviceName() << "]";
 
     return getNamedAudioDeviceForMode(mode, deviceName);
 #endif

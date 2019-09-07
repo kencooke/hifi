@@ -364,8 +364,10 @@ AudioDevices::AudioDevices(bool& contextIsHMD) : _contextIsHMD(contextIsHMD) {
 
     connect(client, &AudioClient::deviceChanged, this, &AudioDevices::onDeviceChanged, Qt::QueuedConnection);
     connect(client, &AudioClient::devicesChanged, this, &AudioDevices::onDevicesChanged, Qt::QueuedConnection);
+    connect(client, &AudioClient::defaultChanged, this, &AudioDevices::onDefaultChanged, Qt::QueuedConnection);
     connect(client, &AudioClient::peakValueListChanged, &_inputs, &AudioInputDeviceList::onPeakValueListChanged, Qt::QueuedConnection);
 
+    // TODO: if current device is pseudo-device "default" then use client->getDefaultAudioDevice()...
     _inputs.onDeviceChanged(client->getActiveAudioDevice(QAudio::AudioInput), contextIsHMD);
     _outputs.onDeviceChanged(client->getActiveAudioDevice(QAudio::AudioOutput), contextIsHMD);
 
@@ -440,6 +442,12 @@ void AudioDevices::onDeviceChanged(QAudio::Mode mode, const QAudioDeviceInfo& de
         }
         _outputs.onDeviceChanged(device, _contextIsHMD);
     }
+}
+
+void AudioDevices::onDefaultChanged(QAudio::Mode mode, const QAudioDeviceInfo& device) {
+    // TODO: if current device is pseudo-device "default" then switch to this device...
+    qDebug() << "The Default Audio Device for mode:" << (mode == QAudio::AudioOutput ? "Output" : "Input")
+        << "has been changed to [" << device.deviceName() << "]";
 }
 
 void AudioDevices::onDevicesChanged(QAudio::Mode mode, const QList<QAudioDeviceInfo>& devices) {

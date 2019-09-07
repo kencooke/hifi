@@ -132,6 +132,7 @@ private slots:
                           const QAudioDeviceInfo& previousDevice, bool isHMD);
     void onDeviceChanged(QAudio::Mode mode, const QAudioDeviceInfo& device);
     void onDevicesChanged(QAudio::Mode mode, const QList<QAudioDeviceInfo>& devices);
+    void onDefaultChanged(QAudio::Mode mode, const QAudioDeviceInfo& device);
 
 private:
     friend class Audio;
