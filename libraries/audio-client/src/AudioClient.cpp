@@ -91,6 +91,8 @@ using Lock = std::unique_lock<Mutex>;
 Mutex _deviceMutex;
 Mutex _recordMutex;
 
+QAudioDeviceInfo defaultAudioDeviceForMode(QAudio::Mode mode);
+
 // thread-safe
 QList<QAudioDeviceInfo> getAvailableDevices(QAudio::Mode mode) {
     // NOTE: availableDevices() clobbers the Qt internal device list
@@ -107,6 +109,19 @@ void AudioClient::checkDevices() {
         return;
     }
 
+    // detect when the default audio device setting in the OS has been changed
+    QAudioDeviceInfo defaultInputDeviceInfo = defaultAudioDeviceForMode(QAudio::AudioInput);
+    QAudioDeviceInfo defaultOutputDeviceInfo = defaultAudioDeviceForMode(QAudio::AudioOutput);
+
+    if (defaultInputDeviceInfo != _defaultInputDeviceInfo) {
+        _defaultInputDeviceInfo = defaultInputDeviceInfo;
+    }
+
+    if (defaultOutputDeviceInfo != _defaultOutputDeviceInfo) {
+        _defaultOutputDeviceInfo = defaultOutputDeviceInfo;
+    }
+
+    // detect when an audio device has been added or removed
     auto inputDevices = getAvailableDevices(QAudio::AudioInput);
     auto outputDevices = getAvailableDevices(QAudio::AudioOutput);
 
