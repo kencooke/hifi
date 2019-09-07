@@ -758,22 +758,22 @@ void AudioClient::start() {
     _desiredOutputFormat = _desiredInputFormat;
     _desiredOutputFormat.setChannelCount(OUTPUT_CHANNEL_COUNT);
 
-    QAudioDeviceInfo inputDeviceInfo = defaultAudioDeviceForMode(QAudio::AudioInput);
-    qCDebug(audioclient) << "The default audio input device is" << inputDeviceInfo.deviceName();
-    bool inputFormatSupported = switchInputToAudioDevice(inputDeviceInfo);
+    _defaultInputDeviceInfo = defaultAudioDeviceForMode(QAudio::AudioInput);
+    qCDebug(audioclient) << "The default audio input device is" << _defaultInputDeviceInfo.deviceName();
+    bool inputFormatSupported = switchInputToAudioDevice(_defaultInputDeviceInfo);
 
-    QAudioDeviceInfo outputDeviceInfo = defaultAudioDeviceForMode(QAudio::AudioOutput);
-    qCDebug(audioclient) << "The default audio output device is" << outputDeviceInfo.deviceName();
-    bool outputFormatSupported = switchOutputToAudioDevice(outputDeviceInfo);
+    _defaultOutputDeviceInfo = defaultAudioDeviceForMode(QAudio::AudioOutput);
+    qCDebug(audioclient) << "The default audio output device is" << _defaultOutputDeviceInfo.deviceName();
+    bool outputFormatSupported = switchOutputToAudioDevice(_defaultOutputDeviceInfo);
 
     if (!inputFormatSupported) {
         qCDebug(audioclient) << "Unable to set up audio input because of a problem with input format.";
-        qCDebug(audioclient) << "The closest format available is" << inputDeviceInfo.nearestFormat(_desiredInputFormat);
+        qCDebug(audioclient) << "The closest format available is" << _defaultInputDeviceInfo.nearestFormat(_desiredInputFormat);
     }
 
     if (!outputFormatSupported) {
         qCDebug(audioclient) << "Unable to set up audio output because of a problem with output format.";
-        qCDebug(audioclient) << "The closest format available is" << outputDeviceInfo.nearestFormat(_desiredOutputFormat);
+        qCDebug(audioclient) << "The closest format available is" << _defaultOutputDeviceInfo.nearestFormat(_desiredOutputFormat);
     }
 #if defined(Q_OS_ANDROID)
     connect(&_checkInputTimer, &QTimer::timeout, this, &AudioClient::checkInputTimeout);

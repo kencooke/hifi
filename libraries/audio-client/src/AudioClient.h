@@ -462,6 +462,9 @@ private:
     QAudioDeviceInfo _inputDeviceInfo;
     QAudioDeviceInfo _outputDeviceInfo;
 
+    QAudioDeviceInfo _defaultInputDeviceInfo;
+    QAudioDeviceInfo _defaultOutputDeviceInfo;
+
     QList<QAudioDeviceInfo> _inputDevices;
     QList<QAudioDeviceInfo> _outputDevices;
 
