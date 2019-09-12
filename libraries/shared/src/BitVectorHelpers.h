@@ -72,16 +72,16 @@ int readBitVector(const uint8_t* sourceBuffer, int numBits, const F& func) {
 const int MAX_BITVECTOR_BITS = 256;
 const int MAX_BITVECTOR_BYTES = (MAX_BITVECTOR_BITS + 7) / 8;
 
-// For this coding scheme, the worst case is 2 x uncompressed size,
+// For this coding scheme, the worst case is 2 x uncompressed size, plus one byte
 // and bitstream reader/writer may overread/overwrite by 1 byte.
-const int MAX_CODE_BYTES = 2 * MAX_BITVECTOR_BYTES + 1;
+const int MAX_CODE2_BYTES = 4 * MAX_BITVECTOR_BYTES + 2;
 
-// Encode bitVector[numBits] into codeBytes[MAX_CODE_BYTES]
+// Encode pair of bitVector[numBits] into codeBytes[MAX_CODE2_BYTES]
 // returns the number of actual bytes used
-int encodeBitVector(bool* bitVector, int numBits, uint8_t* codeBytes, int maxCodeBytes);
+int encodeBitVector2(bool* bitVector, int numBits, uint8_t* codeBytes, int maxCodeBytes);
 
-// Decode codeBytes[numCodeBytes] into bitVector[numBits]
+// Decode codeBytes[maxCodeBytes] into pair of bitVector[numBits]
 // numBits must already be known at the decoder
-void decodeBitVector(uint8_t* codeBytes, int numCodeBytes, bool* bitVector, int numBits);
+void decodeBitVector2(uint8_t* codeBytes, int maxCodeBytes, bool* bitVector, int numBits);
 
 #endif
