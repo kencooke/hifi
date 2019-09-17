@@ -104,7 +104,14 @@ public:
         return bit & 0x1;
     }
 
-    // flush bitstream, and return total bytes
+    // return total bytes used
+    int bytes() {
+        assert(_pos != nullptr);
+
+        return _pos - _start + (_offset != 0);
+    }
+
+    // flush bitstream, and return total bytes used
     int flush() {
         assert(_pos != nullptr);
 
@@ -114,7 +121,7 @@ public:
             putBit(1);
         }
 
-        return _pos - _start;
+        return bytes();
     }
 
     // encode symbol using Golomb-Rice coding with parameter k
@@ -158,113 +165,106 @@ public:
 
 static const int adaptive_k_table[2] = { 1, 5 };
 
-int encodeBitVector2(bool* bitVector, int numBits, uint8_t* codeBytes, int maxCodeBytes) {
+int encodeBitVector(bool* bitVector, int numBits, uint8_t* codeBytes, int maxCodeBytes) {
     assert(numBits > 0);
     assert(numBits <= MAX_BITVECTOR_BITS);
 
     int runLengths[MAX_BITVECTOR_BITS];
+
+    //
+    // Run-length encode
+    //
+    bool startBit = bitVector[0];
+
+    int numRunLengths = 0;
+    int sumRunLengths = 0;
+    for (int i = 0; i < numBits;) {
+
+        bool bit = bitVector[i];
+        int length = 0;
+
+        while (++i < numBits && bitVector[i] == bit) {
+            length++;
+        }
+
+        runLengths[numRunLengths++] = length;
+        sumRunLengths += length;
+    }
+
+    // adapt k based on mean symbol value
+    int ki = sumRunLengths > 8 * numRunLengths;
+    int k = adaptive_k_table[ki];
+
+    //
+    // Encode the bits
+    //
     BitStream bs(codeBytes, maxCodeBytes, true);
 
-    for (int n = 0; n < 2; n++) {
+    // encode k index
+    bs.putBit(ki);
 
-        //
-        // Run-length encode
-        //
-        bool startBit = bitVector[0];
+    // encode start bit
+    bs.putBit(startBit);
 
-        int numRunLengths = 0;
-        int sumRunLengths = 0;
-        for (int i = 0; i < numBits;) {
-
-            bool bit = bitVector[i];
-            int length = 0;
-
-            while (++i < numBits && bitVector[i] == bit) {
-                length++;
-            }
-
-            runLengths[numRunLengths++] = length;
-            sumRunLengths += length;
-        }
-
-        // adapt k based on mean symbol value
-        int ki = sumRunLengths > 8 * numRunLengths;
-        int k = adaptive_k_table[ki];
-
-        //
-        // Encode the bits
-        //
-
-        // encode k index
-        bs.putBit(ki);
-
-        // encode start bit
-        bs.putBit(startBit);
-
-        // encode run lengths
-        for (int i = 0; i < numRunLengths; i++) {
-            bs.encodeGR(runLengths[i], k);        
-        }
-
-        bitVector += numBits;
+    // encode run lengths
+    for (int i = 0; i < numRunLengths; i++) {
+        bs.encodeGR(runLengths[i], k);        
     }
 
     // return bytes encoded
     return bs.flush();
 }
 
-void decodeBitVector2(uint8_t* codeBytes, int maxCodeBytes, bool* bitVector, int numBits) {
+int decodeBitVector(uint8_t* codeBytes, int maxCodeBytes, bool* bitVector, int numBits) {
     assert(numBits > 0);
     assert(numBits <= MAX_BITVECTOR_BITS);
 
     int runLengths[MAX_BITVECTOR_BITS];
+
+    //
+    // Decode the bits
+    //
     BitStream bs(codeBytes, maxCodeBytes, false);
 
-    for (int n = 0; n < 2; n++) {
+    // decode k index
+    int ki = bs.getBit();
+    int k = adaptive_k_table[ki];
 
-        //
-        // Decode the bits
-        //
+    // decode start bit
+    bool startBit = bs.getBit();
 
-        // decode k index
-        int ki = bs.getBit();
-        int k = adaptive_k_table[ki];
+    // decode run lengths
+    int numRunLengths = 0;
+    int sumRunLengths = 0;
+    while (numRunLengths + sumRunLengths < numBits) {
 
-        // decode start bit
-        bool startBit = bs.getBit();
+        uint32_t length = bs.decodeGR(k);
 
-        // decode run lengths
-        int numRunLengths = 0;
-        int sumRunLengths = 0;
-        while (numRunLengths + sumRunLengths < numBits) {
-
-            uint32_t length = bs.decodeGR(k);
-
-            runLengths[numRunLengths++] = length;
-            sumRunLengths += length;
-        }
-        assert(numRunLengths + sumRunLengths == numBits);
-
-        //
-        // Run-length decode
-        //
-        bool bit = startBit;
-        int numBitsDecoded = 0;
-        for (int i = 0; i < numRunLengths; i++) {
-
-            uint32_t length = runLengths[i];
-
-            bitVector[numBitsDecoded++] = bit;
-            while (length--) {
-                bitVector[numBitsDecoded++] = bit;
-            }
-
-            bit ^= 0x1;
-        }
-        assert(numBitsDecoded == numBits);
-
-        bitVector += numBits;
+        runLengths[numRunLengths++] = length;
+        sumRunLengths += length;
     }
+    assert(numRunLengths + sumRunLengths == numBits);
+
+    //
+    // Run-length decode
+    //
+    bool bit = startBit;
+    int numBitsDecoded = 0;
+    for (int i = 0; i < numRunLengths; i++) {
+
+        uint32_t length = runLengths[i];
+
+        bitVector[numBitsDecoded++] = bit;
+        while (length--) {
+            bitVector[numBitsDecoded++] = bit;
+        }
+
+        bit ^= 0x1;
+    }
+    assert(numBitsDecoded == numBits);
+
+    // return bytes decoded
+    return bs.bytes();
 }
 
 #if 0   // unit test
@@ -293,30 +293,29 @@ void main(void) {
     int totalBitVectors = 0;
     int totalCodeBytes = 0;
 
-    bool bitVector[2 * MAX_BITVECTOR_BITS]; // pair of bitVector[numBits]
+    bool bitVector[MAX_BITVECTOR_BITS];
+    while (int numBits = nextData(bitVector)) {
 
-    while (int numBits = nextData(&bitVector[0])) {
+        // encode
+        uint8_t codeBytes[MAX_CODE_BYTES];
+        int numCodeBytes = encodeBitVector(bitVector, numBits, codeBytes, MAX_CODE_BYTES);
+        assert(numCodeBytes <= MAX_CODE_BYTES);
 
-        // read second bitVector
-        nextData(&bitVector[numBits]);
+        // decode
+        bool bitVectorDecoded[MAX_BITVECTOR_BITS];
+        int numCodeBytesDecoded = decodeBitVector(codeBytes, MAX_CODE_BYTES, bitVectorDecoded, numBits);
+        assert(numCodeBytesDecoded <= MAX_CODE_BYTES);
 
-        // encode pair
-        uint8_t codeBytes[MAX_CODE2_BYTES];
-        int numCodeBytes = encodeBitVector2(bitVector, numBits, codeBytes, MAX_CODE2_BYTES);
-
-        // decode pair
-        bool bitVectorDecoded[2 * MAX_BITVECTOR_BITS];
-        decodeBitVector2(codeBytes, MAX_CODE2_BYTES, bitVectorDecoded, numBits);
-
-        // compare pair
-        for (int i = 0; i < 2 * numBits; i++) {
+        // compare
+        assert(numCodeBytes == numCodeBytesDecoded);
+        for (int i = 0; i < numBits; i++) {
             assert(bitVector[i] == bitVectorDecoded[i]);
         }
 
         // stats
-        totalBitVectors += 2;
+        totalBitVectors += 1;
         totalCodeBytes += numCodeBytes;
-        printf("bytes=%2d/%2d\n", numCodeBytes, 2 * ((numBits + 7) / 8));
+        printf("bytes=%2d/%2d\n", numCodeBytes, (numBits + 7) / 8);
     }
     printf("\nAverage bytes per vector = %0.2f\n", (double)totalCodeBytes / totalBitVectors);
 }
