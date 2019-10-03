@@ -106,8 +106,8 @@
 #include <MessagesClient.h>
 #include <hfm/ModelFormatRegistry.h>
 #include <model-networking/ModelCacheScriptingInterface.h>
+#include <material-networking/MaterialCacheScriptingInterface.h>
 #include <material-networking/TextureCacheScriptingInterface.h>
-#include <material-networking/MaterialCache.h>
 #include <ModelEntityItem.h>
 #include <NetworkAccessManager.h>
 #include <NetworkingConstants.h>
@@ -263,6 +263,12 @@ extern "C" {
 #if defined(Q_OS_ANDROID)
 #include <android/log.h>
 #include "AndroidHelper.h"
+#endif
+
+#if defined(Q_OS_MAC)
+// On Mac OS, disable App Nap to prevent audio glitches while running in the background
+#include "AppNapDisabler.h"
+static AppNapDisabler appNapDisabler;   // disabled, while in scope
 #endif
 
 #include "graphics/RenderEventHandler.h"
@@ -856,9 +862,9 @@ bool setupEssentials(int& argc, char** argv, bool runningMarkerExisted) {
     DependencyManager::set<VirtualPad::Manager>();
     DependencyManager::set<DesktopPreviewProvider>();
 #if defined(Q_OS_ANDROID)
-    DependencyManager::set<AccountManager>(); // use the default user agent getter
+    DependencyManager::set<AccountManager>(true); // use the default user agent getter
 #else
-    DependencyManager::set<AccountManager>(std::bind(&Application::getUserAgent, qApp));
+    DependencyManager::set<AccountManager>(true, std::bind(&Application::getUserAgent, qApp));
 #endif
     DependencyManager::set<StatTracker>();
     DependencyManager::set<ScriptEngines>(ScriptEngine::CLIENT_SCRIPT, defaultScriptsOverrideOption);
@@ -886,6 +892,7 @@ bool setupEssentials(int& argc, char** argv, bool runningMarkerExisted) {
     DependencyManager::set<TextureCache>();
     DependencyManager::set<MaterialCache>();
     DependencyManager::set<TextureCacheScriptingInterface>();
+    DependencyManager::set<MaterialCacheScriptingInterface>();
     DependencyManager::set<FramebufferCache>();
     DependencyManager::set<AnimationCache>();
     DependencyManager::set<AnimationCacheScriptingInterface>();
@@ -2906,6 +2913,7 @@ Application::~Application() {
     DependencyManager::destroy<AnimationCacheScriptingInterface>();
     DependencyManager::destroy<AnimationCache>();
     DependencyManager::destroy<FramebufferCache>();
+    DependencyManager::destroy<MaterialCacheScriptingInterface>();
     DependencyManager::destroy<MaterialCache>();
     DependencyManager::destroy<TextureCacheScriptingInterface>();
     DependencyManager::destroy<TextureCache>();
@@ -3431,6 +3439,7 @@ void Application::onDesktopRootContextCreated(QQmlContext* surfaceContext) {
     // Caches
     surfaceContext->setContextProperty("AnimationCache", DependencyManager::get<AnimationCacheScriptingInterface>().data());
     surfaceContext->setContextProperty("TextureCache", DependencyManager::get<TextureCacheScriptingInterface>().data());
+    surfaceContext->setContextProperty("MaterialCache", DependencyManager::get<MaterialCacheScriptingInterface>().data());
     surfaceContext->setContextProperty("ModelCache", DependencyManager::get<ModelCacheScriptingInterface>().data());
     surfaceContext->setContextProperty("SoundCache", DependencyManager::get<SoundCacheScriptingInterface>().data());
 
@@ -7461,6 +7470,7 @@ void Application::registerScriptEngineWithApplicationServices(const ScriptEngine
     // Caches
     scriptEngine->registerGlobalObject("AnimationCache", DependencyManager::get<AnimationCacheScriptingInterface>().data());
     scriptEngine->registerGlobalObject("TextureCache", DependencyManager::get<TextureCacheScriptingInterface>().data());
+    scriptEngine->registerGlobalObject("MaterialCache", DependencyManager::get<MaterialCacheScriptingInterface>().data());
     scriptEngine->registerGlobalObject("ModelCache", DependencyManager::get<ModelCacheScriptingInterface>().data());
     scriptEngine->registerGlobalObject("SoundCache", DependencyManager::get<SoundCacheScriptingInterface>().data());
 
@@ -8494,6 +8504,8 @@ void Application::toggleLogDialog() {
             Qt::WindowFlags flags = _logDialog->windowFlags() | Qt::Tool;
             _logDialog->setWindowFlags(flags);
         }
+#else
+        Q_UNUSED(keepOnTop)
 #endif
     }
 
